@@ -40,13 +40,13 @@ const (
 	AAA_DEBUG_FIELD       = "debug"
 	AAA_TRACE_FIELD       = "trace"
 
-	AAA_URI                     = "/openconfig-system:system/aaa"
-	AAA_AUTHENTICATION_URI      = "/openconfig-system:system/aaa/authentication"
-	AAA_AUTHENTICATION_CFG_URI  = "/openconfig-system:system/aaa/authentication/config"
-	AAA_AUTHORIZATION_URI       = "/openconfig-system:system/aaa/authorization"
-	AAA_AUTHORIZATION_CFG_URI   = "/openconfig-system:system/aaa/authorization/config"
-	AAA_ACCOUNTING_URI          = "/openconfig-system:system/aaa/accounting"
-	AAA_ACCOUNTING_CFG_URI      = "/openconfig-system:system/aaa/accounting/config"
+	AAA_URI                    = "/openconfig-system:system/aaa"
+	AAA_AUTHENTICATION_URI     = "/openconfig-system:system/aaa/authentication"
+	AAA_AUTHENTICATION_CFG_URI = "/openconfig-system:system/aaa/authentication/config"
+	AAA_AUTHORIZATION_URI      = "/openconfig-system:system/aaa/authorization"
+	AAA_AUTHORIZATION_CFG_URI  = "/openconfig-system:system/aaa/authorization/config"
+	AAA_ACCOUNTING_URI         = "/openconfig-system:system/aaa/accounting"
+	AAA_ACCOUNTING_CFG_URI     = "/openconfig-system:system/aaa/accounting/config"
 )
 
 func init() {
@@ -70,6 +70,39 @@ func getAaaRoot(s *ygot.GoStruct) *ocbinds.OpenconfigSystem_System_Aaa {
 		return nil
 	}
 	return deviceObj.System.Aaa
+}
+
+func extractAuthMethodString(m ocbinds.OpenconfigSystem_System_Aaa_Authentication_Config_AuthenticationMethod_Union) string {
+	switch v := m.(type) {
+	case *ocbinds.OpenconfigSystem_System_Aaa_Authentication_Config_AuthenticationMethod_Union_E_OpenconfigAaaTypes_AAA_METHOD_TYPE:
+		return methodTypeToString(v.E_OpenconfigAaaTypes_AAA_METHOD_TYPE)
+	case *ocbinds.OpenconfigSystem_System_Aaa_Authentication_Config_AuthenticationMethod_Union_String:
+		return v.String
+	default:
+		return ""
+	}
+}
+
+func extractAuthzMethodString(m ocbinds.OpenconfigSystem_System_Aaa_Authorization_Config_AuthorizationMethod_Union) string {
+	switch v := m.(type) {
+	case *ocbinds.OpenconfigSystem_System_Aaa_Authorization_Config_AuthorizationMethod_Union_E_OpenconfigAaaTypes_AAA_METHOD_TYPE:
+		return methodTypeToString(v.E_OpenconfigAaaTypes_AAA_METHOD_TYPE)
+	case *ocbinds.OpenconfigSystem_System_Aaa_Authorization_Config_AuthorizationMethod_Union_String:
+		return v.String
+	default:
+		return ""
+	}
+}
+
+func extractAcctMethodString(m ocbinds.OpenconfigSystem_System_Aaa_Accounting_Config_AccountingMethod_Union) string {
+	switch v := m.(type) {
+	case *ocbinds.OpenconfigSystem_System_Aaa_Accounting_Config_AccountingMethod_Union_E_OpenconfigAaaTypes_AAA_METHOD_TYPE:
+		return methodTypeToString(v.E_OpenconfigAaaTypes_AAA_METHOD_TYPE)
+	case *ocbinds.OpenconfigSystem_System_Aaa_Accounting_Config_AccountingMethod_Union_String:
+		return v.String
+	default:
+		return ""
+	}
 }
 
 var aaa_subtree_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (map[string]map[string]db.Value, error) {
@@ -102,9 +135,8 @@ var YangToDb_aaa_subtree_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (m
 			methods := aaaObj.Authentication.Config.AuthenticationMethod
 			methodStrs := make([]string, 0, len(methods))
 			for _, m := range methods {
-				if mStr, ok := m.(ocbinds.E_OpenconfigAaaTypes_AAA_METHOD_TYPE); ok {
-					methodStrs = append(methodStrs, methodTypeToString(mStr))
-				} else if mStr, ok := m.(string); ok {
+				mStr := extractAuthMethodString(m)
+				if mStr != "" {
 					methodStrs = append(methodStrs, mStr)
 				}
 			}
@@ -112,15 +144,6 @@ var YangToDb_aaa_subtree_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (m
 				aaa_map[AAA_AUTHENTICATION_KEY].Field[AAA_LOGIN_FIELD] = strings.Join(methodStrs, ",")
 			}
 		}
-
-		fillBooleanField(aaa_map, AAA_AUTHENTICATION_KEY, AAA_FAILTHROUGH_FIELD,
-			aaaObj.Authentication.Config.Failthrough)
-		fillBooleanField(aaa_map, AAA_AUTHENTICATION_KEY, AAA_FALLBACK_FIELD,
-			aaaObj.Authentication.Config.Fallback)
-		fillBooleanField(aaa_map, AAA_AUTHENTICATION_KEY, AAA_DEBUG_FIELD,
-			aaaObj.Authentication.Config.Debug)
-		fillBooleanField(aaa_map, AAA_AUTHENTICATION_KEY, AAA_TRACE_FIELD,
-			aaaObj.Authentication.Config.Trace)
 	}
 
 	if aaaObj.Authorization != nil && aaaObj.Authorization.Config != nil {
@@ -130,9 +153,8 @@ var YangToDb_aaa_subtree_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (m
 			methods := aaaObj.Authorization.Config.AuthorizationMethod
 			methodStrs := make([]string, 0, len(methods))
 			for _, m := range methods {
-				if mStr, ok := m.(ocbinds.E_OpenconfigAaaTypes_AAA_METHOD_TYPE); ok {
-					methodStrs = append(methodStrs, methodTypeToString(mStr))
-				} else if mStr, ok := m.(string); ok {
+				mStr := extractAuthzMethodString(m)
+				if mStr != "" {
 					methodStrs = append(methodStrs, mStr)
 				}
 			}
@@ -149,9 +171,8 @@ var YangToDb_aaa_subtree_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (m
 			methods := aaaObj.Accounting.Config.AccountingMethod
 			methodStrs := make([]string, 0, len(methods))
 			for _, m := range methods {
-				if mStr, ok := m.(ocbinds.E_OpenconfigAaaTypes_AAA_METHOD_TYPE); ok {
-					methodStrs = append(methodStrs, methodTypeToString(mStr))
-				} else if mStr, ok := m.(string); ok {
+				mStr := extractAcctMethodString(m)
+				if mStr != "" {
 					methodStrs = append(methodStrs, mStr)
 				}
 			}
@@ -175,18 +196,6 @@ func handleAaaDelete(targetUriPath string, aaa_map map[string]db.Value, res_map 
 	case strings.Contains(targetUriPath, "authentication/config/authentication-method"):
 		aaa_map[AAA_AUTHENTICATION_KEY] = db.Value{Field: make(map[string]string)}
 		aaa_map[AAA_AUTHENTICATION_KEY].Field[AAA_LOGIN_FIELD] = ""
-	case strings.Contains(targetUriPath, "authentication/config/failthrough"):
-		aaa_map[AAA_AUTHENTICATION_KEY] = db.Value{Field: make(map[string]string)}
-		aaa_map[AAA_AUTHENTICATION_KEY].Field[AAA_FAILTHROUGH_FIELD] = ""
-	case strings.Contains(targetUriPath, "authentication/config/fallback"):
-		aaa_map[AAA_AUTHENTICATION_KEY] = db.Value{Field: make(map[string]string)}
-		aaa_map[AAA_AUTHENTICATION_KEY].Field[AAA_FALLBACK_FIELD] = ""
-	case strings.Contains(targetUriPath, "authentication/config/debug"):
-		aaa_map[AAA_AUTHENTICATION_KEY] = db.Value{Field: make(map[string]string)}
-		aaa_map[AAA_AUTHENTICATION_KEY].Field[AAA_DEBUG_FIELD] = ""
-	case strings.Contains(targetUriPath, "authentication/config/trace"):
-		aaa_map[AAA_AUTHENTICATION_KEY] = db.Value{Field: make(map[string]string)}
-		aaa_map[AAA_AUTHENTICATION_KEY].Field[AAA_TRACE_FIELD] = ""
 	case strings.Contains(targetUriPath, "authorization/config/authorization-method"):
 		aaa_map[AAA_AUTHORIZATION_KEY] = db.Value{Field: make(map[string]string)}
 		aaa_map[AAA_AUTHORIZATION_KEY].Field[AAA_LOGIN_FIELD] = ""
@@ -200,16 +209,6 @@ func handleAaaDelete(targetUriPath string, aaa_map map[string]db.Value, res_map 
 	}
 
 	return res_map, err
-}
-
-func fillBooleanField(aaa_map map[string]db.Value, key string, field string, value *bool) {
-	if value != nil {
-		if *value {
-			aaa_map[key].Field[field] = "True"
-		} else {
-			aaa_map[key].Field[field] = "False"
-		}
-	}
 }
 
 func methodTypeToString(method ocbinds.E_OpenconfigAaaTypes_AAA_METHOD_TYPE) string {
@@ -273,39 +272,21 @@ var DbToYang_aaa_subtree_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams) er
 
 		if login := authEntry.Get(AAA_LOGIN_FIELD); login != "" {
 			methods := strings.Split(login, ",")
-			methodList := make([]ocbinds.OpenconfigSystem_System_Aaa_Authentication_Config_AuthenticationMethod_Union, 0, len(methods))
+			configMethodList := make([]ocbinds.OpenconfigSystem_System_Aaa_Authentication_Config_AuthenticationMethod_Union, 0, len(methods))
+			stateMethodList := make([]ocbinds.OpenconfigSystem_System_Aaa_Authentication_State_AuthenticationMethod_Union, 0, len(methods))
 			for _, m := range methods {
 				methodType := stringToMethodType(m)
 				if methodType != ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_UNSET {
-					methodList = append(methodList, methodType)
+					configMethodList = append(configMethodList, &ocbinds.OpenconfigSystem_System_Aaa_Authentication_Config_AuthenticationMethod_Union_E_OpenconfigAaaTypes_AAA_METHOD_TYPE{
+						E_OpenconfigAaaTypes_AAA_METHOD_TYPE: methodType,
+					})
+					stateMethodList = append(stateMethodList, &ocbinds.OpenconfigSystem_System_Aaa_Authentication_State_AuthenticationMethod_Union_E_OpenconfigAaaTypes_AAA_METHOD_TYPE{
+						E_OpenconfigAaaTypes_AAA_METHOD_TYPE: methodType,
+					})
 				}
 			}
-			aaaObj.Authentication.Config.AuthenticationMethod = methodList
-			aaaObj.Authentication.State.AuthenticationMethod = methodList
-		}
-
-		if failthrough := authEntry.Get(AAA_FAILTHROUGH_FIELD); failthrough != "" {
-			val := strings.ToLower(failthrough) == "true"
-			aaaObj.Authentication.Config.Failthrough = &val
-			aaaObj.Authentication.State.Failthrough = &val
-		}
-
-		if fallback := authEntry.Get(AAA_FALLBACK_FIELD); fallback != "" {
-			val := strings.ToLower(fallback) == "true"
-			aaaObj.Authentication.Config.Fallback = &val
-			aaaObj.Authentication.State.Fallback = &val
-		}
-
-		if debug := authEntry.Get(AAA_DEBUG_FIELD); debug != "" {
-			val := strings.ToLower(debug) == "true"
-			aaaObj.Authentication.Config.Debug = &val
-			aaaObj.Authentication.State.Debug = &val
-		}
-
-		if trace := authEntry.Get(AAA_TRACE_FIELD); trace != "" {
-			val := strings.ToLower(trace) == "true"
-			aaaObj.Authentication.Config.Trace = &val
-			aaaObj.Authentication.State.Trace = &val
+			aaaObj.Authentication.Config.AuthenticationMethod = configMethodList
+			aaaObj.Authentication.State.AuthenticationMethod = stateMethodList
 		}
 	}
 
@@ -323,15 +304,21 @@ var DbToYang_aaa_subtree_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams) er
 
 		if login := authzEntry.Get(AAA_LOGIN_FIELD); login != "" {
 			methods := strings.Split(login, ",")
-			methodList := make([]ocbinds.OpenconfigSystem_System_Aaa_Authorization_Config_AuthorizationMethod_Union, 0, len(methods))
+			configMethodList := make([]ocbinds.OpenconfigSystem_System_Aaa_Authorization_Config_AuthorizationMethod_Union, 0, len(methods))
+			stateMethodList := make([]ocbinds.OpenconfigSystem_System_Aaa_Authorization_State_AuthorizationMethod_Union, 0, len(methods))
 			for _, m := range methods {
 				methodType := stringToMethodType(m)
 				if methodType != ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_UNSET {
-					methodList = append(methodList, methodType)
+					configMethodList = append(configMethodList, &ocbinds.OpenconfigSystem_System_Aaa_Authorization_Config_AuthorizationMethod_Union_E_OpenconfigAaaTypes_AAA_METHOD_TYPE{
+						E_OpenconfigAaaTypes_AAA_METHOD_TYPE: methodType,
+					})
+					stateMethodList = append(stateMethodList, &ocbinds.OpenconfigSystem_System_Aaa_Authorization_State_AuthorizationMethod_Union_E_OpenconfigAaaTypes_AAA_METHOD_TYPE{
+						E_OpenconfigAaaTypes_AAA_METHOD_TYPE: methodType,
+					})
 				}
 			}
-			aaaObj.Authorization.Config.AuthorizationMethod = methodList
-			aaaObj.Authorization.State.AuthorizationMethod = methodList
+			aaaObj.Authorization.Config.AuthorizationMethod = configMethodList
+			aaaObj.Authorization.State.AuthorizationMethod = stateMethodList
 		}
 	}
 
@@ -349,15 +336,21 @@ var DbToYang_aaa_subtree_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams) er
 
 		if login := acctEntry.Get(AAA_LOGIN_FIELD); login != "" {
 			methods := strings.Split(login, ",")
-			methodList := make([]ocbinds.OpenconfigSystem_System_Aaa_Accounting_Config_AccountingMethod_Union, 0, len(methods))
+			configMethodList := make([]ocbinds.OpenconfigSystem_System_Aaa_Accounting_Config_AccountingMethod_Union, 0, len(methods))
+			stateMethodList := make([]ocbinds.OpenconfigSystem_System_Aaa_Accounting_State_AccountingMethod_Union, 0, len(methods))
 			for _, m := range methods {
 				methodType := stringToMethodType(m)
 				if methodType != ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_UNSET {
-					methodList = append(methodList, methodType)
+					configMethodList = append(configMethodList, &ocbinds.OpenconfigSystem_System_Aaa_Accounting_Config_AccountingMethod_Union_E_OpenconfigAaaTypes_AAA_METHOD_TYPE{
+						E_OpenconfigAaaTypes_AAA_METHOD_TYPE: methodType,
+					})
+					stateMethodList = append(stateMethodList, &ocbinds.OpenconfigSystem_System_Aaa_Accounting_State_AccountingMethod_Union_E_OpenconfigAaaTypes_AAA_METHOD_TYPE{
+						E_OpenconfigAaaTypes_AAA_METHOD_TYPE: methodType,
+					})
 				}
 			}
-			aaaObj.Accounting.Config.AccountingMethod = methodList
-			aaaObj.Accounting.State.AccountingMethod = methodList
+			aaaObj.Accounting.Config.AccountingMethod = configMethodList
+			aaaObj.Accounting.State.AccountingMethod = stateMethodList
 		}
 	}
 

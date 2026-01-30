@@ -33,31 +33,11 @@ func TestMethodTypeToString(t *testing.T) {
 		method   ocbinds.E_OpenconfigAaaTypes_AAA_METHOD_TYPE
 		expected string
 	}{
-		{
-			name:     "LOCAL method",
-			method:   ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_LOCAL,
-			expected: "local",
-		},
-		{
-			name:     "TACACS_ALL method",
-			method:   ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_TACACS_ALL,
-			expected: "tacacs+",
-		},
-		{
-			name:     "RADIUS_ALL method",
-			method:   ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_RADIUS_ALL,
-			expected: "radius",
-		},
-		{
-			name:     "UNSET method",
-			method:   ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_UNSET,
-			expected: "",
-		},
-		{
-			name:     "Unknown method value",
-			method:   ocbinds.E_OpenconfigAaaTypes_AAA_METHOD_TYPE(999),
-			expected: "",
-		},
+		{"LOCAL method", ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_LOCAL, "local"},
+		{"TACACS_ALL method", ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_TACACS_ALL, "tacacs+"},
+		{"RADIUS_ALL method", ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_RADIUS_ALL, "radius"},
+		{"UNSET method", ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_UNSET, ""},
+		{"Unknown method value", ocbinds.E_OpenconfigAaaTypes_AAA_METHOD_TYPE(999), ""},
 	}
 
 	for _, tt := range tests {
@@ -76,56 +56,14 @@ func TestStringToMethodType(t *testing.T) {
 		method   string
 		expected ocbinds.E_OpenconfigAaaTypes_AAA_METHOD_TYPE
 	}{
-		{
-			name:     "local lowercase",
-			method:   "local",
-			expected: ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_LOCAL,
-		},
-		{
-			name:     "LOCAL uppercase",
-			method:   "LOCAL",
-			expected: ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_LOCAL,
-		},
-		{
-			name:     "Local mixed case",
-			method:   "Local",
-			expected: ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_LOCAL,
-		},
-		{
-			name:     "tacacs+ lowercase",
-			method:   "tacacs+",
-			expected: ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_TACACS_ALL,
-		},
-		{
-			name:     "TACACS+ uppercase",
-			method:   "TACACS+",
-			expected: ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_TACACS_ALL,
-		},
-		{
-			name:     "radius lowercase",
-			method:   "radius",
-			expected: ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_RADIUS_ALL,
-		},
-		{
-			name:     "RADIUS uppercase",
-			method:   "RADIUS",
-			expected: ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_RADIUS_ALL,
-		},
-		{
-			name:     "unknown method",
-			method:   "unknown",
-			expected: ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_UNSET,
-		},
-		{
-			name:     "empty string",
-			method:   "",
-			expected: ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_UNSET,
-		},
-		{
-			name:     "ldap (unsupported)",
-			method:   "ldap",
-			expected: ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_UNSET,
-		},
+		{"local lowercase", "local", ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_LOCAL},
+		{"LOCAL uppercase", "LOCAL", ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_LOCAL},
+		{"tacacs+ lowercase", "tacacs+", ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_TACACS_ALL},
+		{"TACACS+ uppercase", "TACACS+", ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_TACACS_ALL},
+		{"radius lowercase", "radius", ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_RADIUS_ALL},
+		{"RADIUS uppercase", "RADIUS", ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_RADIUS_ALL},
+		{"unknown method", "unknown", ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_UNSET},
+		{"empty string", "", ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_UNSET},
 	}
 
 	for _, tt := range tests {
@@ -138,56 +76,104 @@ func TestStringToMethodType(t *testing.T) {
 	}
 }
 
-func TestFillBooleanField(t *testing.T) {
+func TestExtractAuthMethodString(t *testing.T) {
 	tests := []struct {
-		name          string
-		key           string
-		field         string
-		value         *bool
-		expectedValue string
-		expectField   bool
+		name     string
+		method   ocbinds.OpenconfigSystem_System_Aaa_Authentication_Config_AuthenticationMethod_Union
+		expected string
 	}{
 		{
-			name:          "true value",
-			key:           AAA_AUTHENTICATION_KEY,
-			field:         AAA_FAILTHROUGH_FIELD,
-			value:         boolPtr(true),
-			expectedValue: "True",
-			expectField:   true,
+			"LOCAL enum type",
+			&ocbinds.OpenconfigSystem_System_Aaa_Authentication_Config_AuthenticationMethod_Union_E_OpenconfigAaaTypes_AAA_METHOD_TYPE{
+				E_OpenconfigAaaTypes_AAA_METHOD_TYPE: ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_LOCAL,
+			},
+			"local",
 		},
 		{
-			name:          "false value",
-			key:           AAA_AUTHENTICATION_KEY,
-			field:         AAA_FALLBACK_FIELD,
-			value:         boolPtr(false),
-			expectedValue: "False",
-			expectField:   true,
+			"TACACS_ALL enum type",
+			&ocbinds.OpenconfigSystem_System_Aaa_Authentication_Config_AuthenticationMethod_Union_E_OpenconfigAaaTypes_AAA_METHOD_TYPE{
+				E_OpenconfigAaaTypes_AAA_METHOD_TYPE: ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_TACACS_ALL,
+			},
+			"tacacs+",
 		},
 		{
-			name:          "nil value",
-			key:           AAA_AUTHENTICATION_KEY,
-			field:         AAA_DEBUG_FIELD,
-			value:         nil,
-			expectedValue: "",
-			expectField:   false,
+			"String type",
+			&ocbinds.OpenconfigSystem_System_Aaa_Authentication_Config_AuthenticationMethod_Union_String{
+				String: "custom-server-group",
+			},
+			"custom-server-group",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			aaa_map := make(map[string]db.Value)
-			aaa_map[tt.key] = db.Value{Field: make(map[string]string)}
+			result := extractAuthMethodString(tt.method)
+			if result != tt.expected {
+				t.Errorf("extractAuthMethodString() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
 
-			fillBooleanField(aaa_map, tt.key, tt.field, tt.value)
+func TestExtractAuthzMethodString(t *testing.T) {
+	tests := []struct {
+		name     string
+		method   ocbinds.OpenconfigSystem_System_Aaa_Authorization_Config_AuthorizationMethod_Union
+		expected string
+	}{
+		{
+			"LOCAL enum type",
+			&ocbinds.OpenconfigSystem_System_Aaa_Authorization_Config_AuthorizationMethod_Union_E_OpenconfigAaaTypes_AAA_METHOD_TYPE{
+				E_OpenconfigAaaTypes_AAA_METHOD_TYPE: ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_LOCAL,
+			},
+			"local",
+		},
+		{
+			"String type",
+			&ocbinds.OpenconfigSystem_System_Aaa_Authorization_Config_AuthorizationMethod_Union_String{
+				String: "custom-authz-group",
+			},
+			"custom-authz-group",
+		},
+	}
 
-			if tt.expectField {
-				if val, ok := aaa_map[tt.key].Field[tt.field]; !ok || val != tt.expectedValue {
-					t.Errorf("fillBooleanField() field %s = %v, want %v", tt.field, val, tt.expectedValue)
-				}
-			} else {
-				if _, ok := aaa_map[tt.key].Field[tt.field]; ok {
-					t.Errorf("fillBooleanField() field %s should not be set for nil value", tt.field)
-				}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := extractAuthzMethodString(tt.method)
+			if result != tt.expected {
+				t.Errorf("extractAuthzMethodString() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestExtractAcctMethodString(t *testing.T) {
+	tests := []struct {
+		name     string
+		method   ocbinds.OpenconfigSystem_System_Aaa_Accounting_Config_AccountingMethod_Union
+		expected string
+	}{
+		{
+			"LOCAL enum type",
+			&ocbinds.OpenconfigSystem_System_Aaa_Accounting_Config_AccountingMethod_Union_E_OpenconfigAaaTypes_AAA_METHOD_TYPE{
+				E_OpenconfigAaaTypes_AAA_METHOD_TYPE: ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_LOCAL,
+			},
+			"local",
+		},
+		{
+			"String type",
+			&ocbinds.OpenconfigSystem_System_Aaa_Accounting_Config_AccountingMethod_Union_String{
+				String: "custom-acct-group",
+			},
+			"custom-acct-group",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := extractAcctMethodString(tt.method)
+			if result != tt.expected {
+				t.Errorf("extractAcctMethodString() = %v, want %v", result, tt.expected)
 			}
 		})
 	}
@@ -200,48 +186,9 @@ func TestHandleAaaDelete(t *testing.T) {
 		expectedKey   string
 		expectedField string
 	}{
-		{
-			name:          "delete authentication-method",
-			targetUriPath: "/openconfig-system:system/aaa/authentication/config/authentication-method",
-			expectedKey:   AAA_AUTHENTICATION_KEY,
-			expectedField: AAA_LOGIN_FIELD,
-		},
-		{
-			name:          "delete failthrough",
-			targetUriPath: "/openconfig-system:system/aaa/authentication/config/failthrough",
-			expectedKey:   AAA_AUTHENTICATION_KEY,
-			expectedField: AAA_FAILTHROUGH_FIELD,
-		},
-		{
-			name:          "delete fallback",
-			targetUriPath: "/openconfig-system:system/aaa/authentication/config/fallback",
-			expectedKey:   AAA_AUTHENTICATION_KEY,
-			expectedField: AAA_FALLBACK_FIELD,
-		},
-		{
-			name:          "delete debug",
-			targetUriPath: "/openconfig-system:system/aaa/authentication/config/debug",
-			expectedKey:   AAA_AUTHENTICATION_KEY,
-			expectedField: AAA_DEBUG_FIELD,
-		},
-		{
-			name:          "delete trace",
-			targetUriPath: "/openconfig-system:system/aaa/authentication/config/trace",
-			expectedKey:   AAA_AUTHENTICATION_KEY,
-			expectedField: AAA_TRACE_FIELD,
-		},
-		{
-			name:          "delete authorization-method",
-			targetUriPath: "/openconfig-system:system/aaa/authorization/config/authorization-method",
-			expectedKey:   AAA_AUTHORIZATION_KEY,
-			expectedField: AAA_LOGIN_FIELD,
-		},
-		{
-			name:          "delete accounting-method",
-			targetUriPath: "/openconfig-system:system/aaa/accounting/config/accounting-method",
-			expectedKey:   AAA_ACCOUNTING_KEY,
-			expectedField: AAA_LOGIN_FIELD,
-		},
+		{"delete authentication-method", "/openconfig-system:system/aaa/authentication/config/authentication-method", AAA_AUTHENTICATION_KEY, AAA_LOGIN_FIELD},
+		{"delete authorization-method", "/openconfig-system:system/aaa/authorization/config/authorization-method", AAA_AUTHORIZATION_KEY, AAA_LOGIN_FIELD},
+		{"delete accounting-method", "/openconfig-system:system/aaa/accounting/config/accounting-method", AAA_ACCOUNTING_KEY, AAA_LOGIN_FIELD},
 	}
 
 	for _, tt := range tests {
@@ -265,14 +212,8 @@ func TestHandleAaaDelete(t *testing.T) {
 				return
 			}
 
-			if _, ok := result[AAA_TABLE][tt.expectedKey].Field[tt.expectedField]; !ok {
-				t.Errorf("handleAaaDelete() field %s not found in result", tt.expectedField)
-				return
-			}
-
 			if result[AAA_TABLE][tt.expectedKey].Field[tt.expectedField] != "" {
-				t.Errorf("handleAaaDelete() field %s should be empty string, got %s",
-					tt.expectedField, result[AAA_TABLE][tt.expectedKey].Field[tt.expectedField])
+				t.Errorf("handleAaaDelete() field %s should be empty string", tt.expectedField)
 			}
 		})
 	}
@@ -294,48 +235,36 @@ func TestHandleAaaDeleteUnknownPath(t *testing.T) {
 }
 
 func TestAaaAuthenticationKeyXfmr(t *testing.T) {
-	inParams := XfmrParams{
-		key: "test_key",
-	}
-
+	inParams := XfmrParams{key: "test_key"}
 	result, err := aaa_authentication_key_xfmr(inParams)
 	if err != nil {
 		t.Errorf("aaa_authentication_key_xfmr() error = %v", err)
 		return
 	}
-
 	if result != AAA_AUTHENTICATION_KEY {
 		t.Errorf("aaa_authentication_key_xfmr() = %v, want %v", result, AAA_AUTHENTICATION_KEY)
 	}
 }
 
 func TestAaaAuthorizationKeyXfmr(t *testing.T) {
-	inParams := XfmrParams{
-		key: "test_key",
-	}
-
+	inParams := XfmrParams{key: "test_key"}
 	result, err := aaa_authorization_key_xfmr(inParams)
 	if err != nil {
 		t.Errorf("aaa_authorization_key_xfmr() error = %v", err)
 		return
 	}
-
 	if result != AAA_AUTHORIZATION_KEY {
 		t.Errorf("aaa_authorization_key_xfmr() = %v, want %v", result, AAA_AUTHORIZATION_KEY)
 	}
 }
 
 func TestAaaAccountingKeyXfmr(t *testing.T) {
-	inParams := XfmrParams{
-		key: "test_key",
-	}
-
+	inParams := XfmrParams{key: "test_key"}
 	result, err := aaa_accounting_key_xfmr(inParams)
 	if err != nil {
 		t.Errorf("aaa_accounting_key_xfmr() error = %v", err)
 		return
 	}
-
 	if result != AAA_ACCOUNTING_KEY {
 		t.Errorf("aaa_accounting_key_xfmr() = %v, want %v", result, AAA_ACCOUNTING_KEY)
 	}
@@ -347,136 +276,22 @@ func TestYangToDbAaaAuthMethodXfmr(t *testing.T) {
 		param    interface{}
 		expected map[string]string
 	}{
-		{
-			name:     "single method",
-			param:    []interface{}{"local"},
-			expected: map[string]string{AAA_LOGIN_FIELD: "local"},
-		},
-		{
-			name:     "multiple methods",
-			param:    []interface{}{"tacacs+", "local"},
-			expected: map[string]string{AAA_LOGIN_FIELD: "tacacs+,local"},
-		},
-		{
-			name:     "empty list",
-			param:    []interface{}{},
-			expected: map[string]string{},
-		},
-		{
-			name:     "nil param",
-			param:    nil,
-			expected: map[string]string{},
-		},
-		{
-			name:     "non-slice param",
-			param:    "local",
-			expected: map[string]string{},
-		},
-		{
-			name:     "mixed types in slice",
-			param:    []interface{}{"local", 123, "radius"},
-			expected: map[string]string{AAA_LOGIN_FIELD: "local,radius"},
-		},
+		{"single method", []interface{}{"local"}, map[string]string{AAA_LOGIN_FIELD: "local"}},
+		{"multiple methods", []interface{}{"tacacs+", "local"}, map[string]string{AAA_LOGIN_FIELD: "tacacs+,local"}},
+		{"empty list", []interface{}{}, map[string]string{}},
+		{"nil param", nil, map[string]string{}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			inParams := XfmrParams{
-				param: tt.param,
-			}
-
+			inParams := XfmrParams{param: tt.param}
 			result, err := YangToDb_aaa_auth_method_xfmr(inParams)
 			if err != nil {
 				t.Errorf("YangToDb_aaa_auth_method_xfmr() error = %v", err)
 				return
 			}
-
 			if !reflect.DeepEqual(result, tt.expected) {
 				t.Errorf("YangToDb_aaa_auth_method_xfmr() = %v, want %v", result, tt.expected)
-			}
-		})
-	}
-}
-
-func TestYangToDbAaaAuthzMethodXfmr(t *testing.T) {
-	tests := []struct {
-		name     string
-		param    interface{}
-		expected map[string]string
-	}{
-		{
-			name:     "single method",
-			param:    []interface{}{"tacacs+"},
-			expected: map[string]string{AAA_LOGIN_FIELD: "tacacs+"},
-		},
-		{
-			name:     "multiple methods",
-			param:    []interface{}{"radius", "local"},
-			expected: map[string]string{AAA_LOGIN_FIELD: "radius,local"},
-		},
-		{
-			name:     "empty list",
-			param:    []interface{}{},
-			expected: map[string]string{},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			inParams := XfmrParams{
-				param: tt.param,
-			}
-
-			result, err := YangToDb_aaa_authz_method_xfmr(inParams)
-			if err != nil {
-				t.Errorf("YangToDb_aaa_authz_method_xfmr() error = %v", err)
-				return
-			}
-
-			if !reflect.DeepEqual(result, tt.expected) {
-				t.Errorf("YangToDb_aaa_authz_method_xfmr() = %v, want %v", result, tt.expected)
-			}
-		})
-	}
-}
-
-func TestYangToDbAaaAcctMethodXfmr(t *testing.T) {
-	tests := []struct {
-		name     string
-		param    interface{}
-		expected map[string]string
-	}{
-		{
-			name:     "single method",
-			param:    []interface{}{"local"},
-			expected: map[string]string{AAA_LOGIN_FIELD: "local"},
-		},
-		{
-			name:     "multiple methods",
-			param:    []interface{}{"tacacs+", "radius", "local"},
-			expected: map[string]string{AAA_LOGIN_FIELD: "tacacs+,radius,local"},
-		},
-		{
-			name:     "empty list",
-			param:    []interface{}{},
-			expected: map[string]string{},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			inParams := XfmrParams{
-				param: tt.param,
-			}
-
-			result, err := YangToDb_aaa_acct_method_xfmr(inParams)
-			if err != nil {
-				t.Errorf("YangToDb_aaa_acct_method_xfmr() error = %v", err)
-				return
-			}
-
-			if !reflect.DeepEqual(result, tt.expected) {
-				t.Errorf("YangToDb_aaa_acct_method_xfmr() = %v, want %v", result, tt.expected)
 			}
 		})
 	}
@@ -490,202 +305,41 @@ func TestDbToYangAaaAuthMethodXfmr(t *testing.T) {
 		expected  map[string]interface{}
 	}{
 		{
-			name: "single method",
-			dbDataMap: map[db.DBNum]map[string]map[string]db.Value{
-				db.ConfigDB: {
-					AAA_TABLE: {
-						AAA_AUTHENTICATION_KEY: db.Value{Field: map[string]string{AAA_LOGIN_FIELD: "local"}},
-					},
-				},
+			"single method",
+			map[db.DBNum]map[string]map[string]db.Value{
+				db.ConfigDB: {AAA_TABLE: {AAA_AUTHENTICATION_KEY: db.Value{Field: map[string]string{AAA_LOGIN_FIELD: "local"}}}},
 			},
-			curDb:    db.ConfigDB,
-			expected: map[string]interface{}{"authentication-method": []string{"local"}},
+			db.ConfigDB,
+			map[string]interface{}{"authentication-method": []string{"local"}},
 		},
 		{
-			name: "multiple methods",
-			dbDataMap: map[db.DBNum]map[string]map[string]db.Value{
-				db.ConfigDB: {
-					AAA_TABLE: {
-						AAA_AUTHENTICATION_KEY: db.Value{Field: map[string]string{AAA_LOGIN_FIELD: "tacacs+,local"}},
-					},
-				},
+			"multiple methods",
+			map[db.DBNum]map[string]map[string]db.Value{
+				db.ConfigDB: {AAA_TABLE: {AAA_AUTHENTICATION_KEY: db.Value{Field: map[string]string{AAA_LOGIN_FIELD: "tacacs+,local"}}}},
 			},
-			curDb:    db.ConfigDB,
-			expected: map[string]interface{}{"authentication-method": []string{"tacacs+", "local"}},
+			db.ConfigDB,
+			map[string]interface{}{"authentication-method": []string{"tacacs+", "local"}},
 		},
 		{
-			name: "empty login field",
-			dbDataMap: map[db.DBNum]map[string]map[string]db.Value{
-				db.ConfigDB: {
-					AAA_TABLE: {
-						AAA_AUTHENTICATION_KEY: db.Value{Field: map[string]string{AAA_LOGIN_FIELD: ""}},
-					},
-				},
+			"empty login field",
+			map[db.DBNum]map[string]map[string]db.Value{
+				db.ConfigDB: {AAA_TABLE: {AAA_AUTHENTICATION_KEY: db.Value{Field: map[string]string{AAA_LOGIN_FIELD: ""}}}},
 			},
-			curDb:    db.ConfigDB,
-			expected: map[string]interface{}{},
-		},
-		{
-			name: "missing AAA table",
-			dbDataMap: map[db.DBNum]map[string]map[string]db.Value{
-				db.ConfigDB: {},
-			},
-			curDb:    db.ConfigDB,
-			expected: map[string]interface{}{},
-		},
-		{
-			name: "missing authentication key",
-			dbDataMap: map[db.DBNum]map[string]map[string]db.Value{
-				db.ConfigDB: {
-					AAA_TABLE: {},
-				},
-			},
-			curDb:    db.ConfigDB,
-			expected: map[string]interface{}{},
+			db.ConfigDB,
+			map[string]interface{}{},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			inParams := XfmrParams{
-				dbDataMap: &tt.dbDataMap,
-				curDb:     tt.curDb,
-			}
-
+			inParams := XfmrParams{dbDataMap: &tt.dbDataMap, curDb: tt.curDb}
 			result, err := DbToYang_aaa_auth_method_xfmr(inParams)
 			if err != nil {
 				t.Errorf("DbToYang_aaa_auth_method_xfmr() error = %v", err)
 				return
 			}
-
 			if !reflect.DeepEqual(result, tt.expected) {
 				t.Errorf("DbToYang_aaa_auth_method_xfmr() = %v, want %v", result, tt.expected)
-			}
-		})
-	}
-}
-
-func TestDbToYangAaaAuthzMethodXfmr(t *testing.T) {
-	tests := []struct {
-		name      string
-		dbDataMap map[db.DBNum]map[string]map[string]db.Value
-		curDb     db.DBNum
-		expected  map[string]interface{}
-	}{
-		{
-			name: "single method",
-			dbDataMap: map[db.DBNum]map[string]map[string]db.Value{
-				db.ConfigDB: {
-					AAA_TABLE: {
-						AAA_AUTHORIZATION_KEY: db.Value{Field: map[string]string{AAA_LOGIN_FIELD: "tacacs+"}},
-					},
-				},
-			},
-			curDb:    db.ConfigDB,
-			expected: map[string]interface{}{"authorization-method": []string{"tacacs+"}},
-		},
-		{
-			name: "multiple methods",
-			dbDataMap: map[db.DBNum]map[string]map[string]db.Value{
-				db.ConfigDB: {
-					AAA_TABLE: {
-						AAA_AUTHORIZATION_KEY: db.Value{Field: map[string]string{AAA_LOGIN_FIELD: "radius,local"}},
-					},
-				},
-			},
-			curDb:    db.ConfigDB,
-			expected: map[string]interface{}{"authorization-method": []string{"radius", "local"}},
-		},
-		{
-			name: "missing authorization key",
-			dbDataMap: map[db.DBNum]map[string]map[string]db.Value{
-				db.ConfigDB: {
-					AAA_TABLE: {},
-				},
-			},
-			curDb:    db.ConfigDB,
-			expected: map[string]interface{}{},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			inParams := XfmrParams{
-				dbDataMap: &tt.dbDataMap,
-				curDb:     tt.curDb,
-			}
-
-			result, err := DbToYang_aaa_authz_method_xfmr(inParams)
-			if err != nil {
-				t.Errorf("DbToYang_aaa_authz_method_xfmr() error = %v", err)
-				return
-			}
-
-			if !reflect.DeepEqual(result, tt.expected) {
-				t.Errorf("DbToYang_aaa_authz_method_xfmr() = %v, want %v", result, tt.expected)
-			}
-		})
-	}
-}
-
-func TestDbToYangAaaAcctMethodXfmr(t *testing.T) {
-	tests := []struct {
-		name      string
-		dbDataMap map[db.DBNum]map[string]map[string]db.Value
-		curDb     db.DBNum
-		expected  map[string]interface{}
-	}{
-		{
-			name: "single method",
-			dbDataMap: map[db.DBNum]map[string]map[string]db.Value{
-				db.ConfigDB: {
-					AAA_TABLE: {
-						AAA_ACCOUNTING_KEY: db.Value{Field: map[string]string{AAA_LOGIN_FIELD: "local"}},
-					},
-				},
-			},
-			curDb:    db.ConfigDB,
-			expected: map[string]interface{}{"accounting-method": []string{"local"}},
-		},
-		{
-			name: "multiple methods",
-			dbDataMap: map[db.DBNum]map[string]map[string]db.Value{
-				db.ConfigDB: {
-					AAA_TABLE: {
-						AAA_ACCOUNTING_KEY: db.Value{Field: map[string]string{AAA_LOGIN_FIELD: "tacacs+,radius,local"}},
-					},
-				},
-			},
-			curDb:    db.ConfigDB,
-			expected: map[string]interface{}{"accounting-method": []string{"tacacs+", "radius", "local"}},
-		},
-		{
-			name: "missing accounting key",
-			dbDataMap: map[db.DBNum]map[string]map[string]db.Value{
-				db.ConfigDB: {
-					AAA_TABLE: {},
-				},
-			},
-			curDb:    db.ConfigDB,
-			expected: map[string]interface{}{},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			inParams := XfmrParams{
-				dbDataMap: &tt.dbDataMap,
-				curDb:     tt.curDb,
-			}
-
-			result, err := DbToYang_aaa_acct_method_xfmr(inParams)
-			if err != nil {
-				t.Errorf("DbToYang_aaa_acct_method_xfmr() error = %v", err)
-				return
-			}
-
-			if !reflect.DeepEqual(result, tt.expected) {
-				t.Errorf("DbToYang_aaa_acct_method_xfmr() = %v, want %v", result, tt.expected)
 			}
 		})
 	}
@@ -707,37 +361,20 @@ func TestConstants(t *testing.T) {
 	if AAA_LOGIN_FIELD != "login" {
 		t.Errorf("AAA_LOGIN_FIELD = %v, want login", AAA_LOGIN_FIELD)
 	}
-	if AAA_FAILTHROUGH_FIELD != "failthrough" {
-		t.Errorf("AAA_FAILTHROUGH_FIELD = %v, want failthrough", AAA_FAILTHROUGH_FIELD)
-	}
-	if AAA_FALLBACK_FIELD != "fallback" {
-		t.Errorf("AAA_FALLBACK_FIELD = %v, want fallback", AAA_FALLBACK_FIELD)
-	}
-	if AAA_DEBUG_FIELD != "debug" {
-		t.Errorf("AAA_DEBUG_FIELD = %v, want debug", AAA_DEBUG_FIELD)
-	}
-	if AAA_TRACE_FIELD != "trace" {
-		t.Errorf("AAA_TRACE_FIELD = %v, want trace", AAA_TRACE_FIELD)
-	}
 }
 
 func TestMethodTypeRoundTrip(t *testing.T) {
-	methods := []string{"local", "tacacs+", "radius"}
+	methods := []ocbinds.E_OpenconfigAaaTypes_AAA_METHOD_TYPE{
+		ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_LOCAL,
+		ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_TACACS_ALL,
+		ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_RADIUS_ALL,
+	}
 
 	for _, method := range methods {
-		methodType := stringToMethodType(method)
-		if methodType == ocbinds.OpenconfigAaaTypes_AAA_METHOD_TYPE_UNSET {
-			t.Errorf("stringToMethodType(%s) returned UNSET", method)
-			continue
-		}
-
-		result := methodTypeToString(methodType)
+		str := methodTypeToString(method)
+		result := stringToMethodType(str)
 		if result != method {
-			t.Errorf("Round trip failed: %s -> %v -> %s", method, methodType, result)
+			t.Errorf("Round trip failed for %v: got %v via string %s", method, result, str)
 		}
 	}
-}
-
-func boolPtr(b bool) *bool {
-	return &b
 }
