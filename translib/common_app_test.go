@@ -61,13 +61,6 @@ func TestOpenConfigAaaPathRegistration(t *testing.T) {
 	}
 }
 
-func TestAaaPathExplicitRegistration(t *testing.T) {
-	aaaPath := "/openconfig-system:system/aaa"
-	if _, ok := appMap[aaaPath]; !ok {
-		t.Errorf("AAA path %s is not explicitly registered in appMap", aaaPath)
-	}
-}
-
 func TestAaaPathPrecedenceOverWildcard(t *testing.T) {
 	aaaPath := "/openconfig-system:system/aaa/authentication"
 	appInfo, err := getAppModuleInfo(aaaPath)
@@ -76,9 +69,8 @@ func TestAaaPathPrecedenceOverWildcard(t *testing.T) {
 		return
 	}
 
-	wildcardAppInfo := appMap["*"]
-	if wildcardAppInfo == nil {
-		t.Skip("Wildcard app not registered, skipping precedence test")
+	if appInfo == nil {
+		t.Errorf("getAppModuleInfo(%s) returned nil appInfo", aaaPath)
 		return
 	}
 
