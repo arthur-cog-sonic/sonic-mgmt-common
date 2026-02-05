@@ -328,6 +328,22 @@ func TestDbToYangAaaAuthMethodXfmr(t *testing.T) {
 			db.ConfigDB,
 			map[string]interface{}{},
 		},
+		{
+			"custom server group string",
+			map[db.DBNum]map[string]map[string]db.Value{
+				db.ConfigDB: {AAA_TABLE: {AAA_AUTHENTICATION_KEY: db.Value{Field: map[string]string{AAA_LOGIN_FIELD: "custom-server-group"}}}},
+			},
+			db.ConfigDB,
+			map[string]interface{}{"authentication-method": []string{"custom-server-group"}},
+		},
+		{
+			"mixed enum and custom string methods",
+			map[db.DBNum]map[string]map[string]db.Value{
+				db.ConfigDB: {AAA_TABLE: {AAA_AUTHENTICATION_KEY: db.Value{Field: map[string]string{AAA_LOGIN_FIELD: "tacacs+,custom-group,local"}}}},
+			},
+			db.ConfigDB,
+			map[string]interface{}{"authentication-method": []string{"tacacs+", "custom-group", "local"}},
+		},
 	}
 
 	for _, tt := range tests {

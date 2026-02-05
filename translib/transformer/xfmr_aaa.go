@@ -283,6 +283,13 @@ var DbToYang_aaa_subtree_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams) er
 					stateMethodList = append(stateMethodList, &ocbinds.OpenconfigSystem_System_Aaa_Authentication_State_AuthenticationMethod_Union_E_OpenconfigAaaTypes_AAA_METHOD_TYPE{
 						E_OpenconfigAaaTypes_AAA_METHOD_TYPE: methodType,
 					})
+				} else if m != "" {
+					configMethodList = append(configMethodList, &ocbinds.OpenconfigSystem_System_Aaa_Authentication_Config_AuthenticationMethod_Union_String{
+						String: m,
+					})
+					stateMethodList = append(stateMethodList, &ocbinds.OpenconfigSystem_System_Aaa_Authentication_State_AuthenticationMethod_Union_String{
+						String: m,
+					})
 				}
 			}
 			aaaObj.Authentication.Config.AuthenticationMethod = configMethodList
@@ -315,6 +322,13 @@ var DbToYang_aaa_subtree_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams) er
 					stateMethodList = append(stateMethodList, &ocbinds.OpenconfigSystem_System_Aaa_Authorization_State_AuthorizationMethod_Union_E_OpenconfigAaaTypes_AAA_METHOD_TYPE{
 						E_OpenconfigAaaTypes_AAA_METHOD_TYPE: methodType,
 					})
+				} else if m != "" {
+					configMethodList = append(configMethodList, &ocbinds.OpenconfigSystem_System_Aaa_Authorization_Config_AuthorizationMethod_Union_String{
+						String: m,
+					})
+					stateMethodList = append(stateMethodList, &ocbinds.OpenconfigSystem_System_Aaa_Authorization_State_AuthorizationMethod_Union_String{
+						String: m,
+					})
 				}
 			}
 			aaaObj.Authorization.Config.AuthorizationMethod = configMethodList
@@ -346,6 +360,13 @@ var DbToYang_aaa_subtree_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams) er
 					})
 					stateMethodList = append(stateMethodList, &ocbinds.OpenconfigSystem_System_Aaa_Accounting_State_AccountingMethod_Union_E_OpenconfigAaaTypes_AAA_METHOD_TYPE{
 						E_OpenconfigAaaTypes_AAA_METHOD_TYPE: methodType,
+					})
+				} else if m != "" {
+					configMethodList = append(configMethodList, &ocbinds.OpenconfigSystem_System_Aaa_Accounting_Config_AccountingMethod_Union_String{
+						String: m,
+					})
+					stateMethodList = append(stateMethodList, &ocbinds.OpenconfigSystem_System_Aaa_Accounting_State_AccountingMethod_Union_String{
+						String: m,
 					})
 				}
 			}
