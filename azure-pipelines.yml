@@ -31,6 +31,9 @@ stages:
 
     pool: sonic-build
 
+    container:
+      image: sonicdev-microsoft.azurecr.io:443/sonic-slave-bookworm:latest
+
     steps:
     - checkout: self
       clean: true
