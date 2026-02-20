@@ -143,9 +143,12 @@ var YangToDb_aaa_subtree_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (m
 		return res_map, err
 	}
 
-	aaaObj, ok := jsonData["openconfig-aaa:aaa"]
+	aaaObj, ok := jsonData["openconfig-system:aaa"]
 	if !ok {
-		aaaObj = jsonData
+		aaaObj, ok = jsonData["openconfig-aaa:aaa"]
+		if !ok {
+			aaaObj = jsonData
+		}
 	}
 	aaaMap, ok := aaaObj.(map[string]interface{})
 	if !ok {
