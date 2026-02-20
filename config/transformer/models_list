@@ -10,6 +10,8 @@ openconfig-if-ip.yang
 openconfig-if-aggregate.yang
 openconfig-mclag.yang
 openconfig-mclag-annot.yang
+openconfig-system.yang
+openconfig-system-annot.yang
 openconfig-vlan.yang
 gnsi-authz.yang
 gnsi-pathz.yang

@@ -146,14 +146,25 @@ func addModel(model *ModelData) error {
 func getAppModuleInfo(path string) (*appInfo, error) {
 	log.Info("getAppModule called for path =", path)
 
+	var bestPattern string
+	var bestApp *appInfo
+
 	for pattern, app := range appMap {
+		if pattern == "*" {
+			continue
+		}
 		if !strings.HasPrefix(path, pattern) {
 			continue
 		}
+		if len(pattern) > len(bestPattern) {
+			bestPattern = pattern
+			bestApp = app
+		}
+	}
 
-		log.Info("found the entry in the map for path =", pattern)
-
-		return app, nil
+	if bestApp != nil {
+		log.Info("found the entry in the map for path =", bestPattern)
+		return bestApp, nil
 	}
 
 	/* If no specific app registered fallback to default/common app */
