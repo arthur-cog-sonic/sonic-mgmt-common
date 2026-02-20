@@ -21,6 +21,7 @@ package transformer
 
 import (
 	"errors"
+	"reflect"
 	"strings"
 
 	"github.com/Azure/sonic-mgmt-common/translib/db"
@@ -78,14 +79,40 @@ func aaaStrToBool(val string) bool {
 	return strings.EqualFold(val, "true")
 }
 
-func aaaMethodListToLoginStr(methods []interface{}) string {
-	var parts []string
-	for _, m := range methods {
-		if s, ok := m.(string); ok {
-			parts = append(parts, s)
-		}
+func aaaAuthMethodUnionToStr(method ocbinds.OpenconfigSystem_System_Aaa_Authentication_Config_AuthenticationMethod_Union) string {
+	unionType := reflect.TypeOf(method).Elem()
+	switch unionType {
+	case reflect.TypeOf(ocbinds.OpenconfigSystem_System_Aaa_Authentication_Config_AuthenticationMethod_Union_String{}):
+		val := method.(*ocbinds.OpenconfigSystem_System_Aaa_Authentication_Config_AuthenticationMethod_Union_String)
+		return val.String
+	default:
+		log.Warningf("aaaAuthMethodUnionToStr: unhandled union type %v", unionType)
+		return ""
 	}
-	return strings.Join(parts, ",")
+}
+
+func aaaAuthzMethodUnionToStr(method ocbinds.OpenconfigSystem_System_Aaa_Authorization_Config_AuthorizationMethod_Union) string {
+	unionType := reflect.TypeOf(method).Elem()
+	switch unionType {
+	case reflect.TypeOf(ocbinds.OpenconfigSystem_System_Aaa_Authorization_Config_AuthorizationMethod_Union_String{}):
+		val := method.(*ocbinds.OpenconfigSystem_System_Aaa_Authorization_Config_AuthorizationMethod_Union_String)
+		return val.String
+	default:
+		log.Warningf("aaaAuthzMethodUnionToStr: unhandled union type %v", unionType)
+		return ""
+	}
+}
+
+func aaaAcctMethodUnionToStr(method ocbinds.OpenconfigSystem_System_Aaa_Accounting_Config_AccountingMethod_Union) string {
+	unionType := reflect.TypeOf(method).Elem()
+	switch unionType {
+	case reflect.TypeOf(ocbinds.OpenconfigSystem_System_Aaa_Accounting_Config_AccountingMethod_Union_String{}):
+		val := method.(*ocbinds.OpenconfigSystem_System_Aaa_Accounting_Config_AccountingMethod_Union_String)
+		return val.String
+	default:
+		log.Warningf("aaaAcctMethodUnionToStr: unhandled union type %v", unionType)
+		return ""
+	}
 }
 
 func aaaLoginStrToMethodList(login string) []string {
@@ -137,59 +164,74 @@ var YangToDb_aaa_subtree_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (m
 		return res_map, err
 	}
 
-	jsonData := aaaExtractJsonPayload(inParams)
-	if jsonData == nil {
-		log.Info("YangToDb_aaa_subtree_xfmr: no JSON payload extracted")
+	sysObj := getAaaSystemRoot(inParams.ygRoot)
+	if sysObj == nil || sysObj.Aaa == nil {
+		log.Info("YangToDb_aaa_subtree_xfmr: no AAA data in ygRoot")
 		return res_map, err
 	}
 
-	aaaObj, ok := jsonData["openconfig-system:aaa"]
-	if !ok {
-		aaaObj, ok = jsonData["openconfig-aaa:aaa"]
-		if !ok {
-			aaaObj = jsonData
+	aaaObj := sysObj.Aaa
+
+	if aaaObj.Authentication != nil && aaaObj.Authentication.Config != nil {
+		authConfig := aaaObj.Authentication.Config
+		aaa_map[AAA_AUTH_KEY] = db.Value{Field: make(map[string]string)}
+
+		if len(authConfig.AuthenticationMethod) > 0 {
+			var parts []string
+			for _, m := range authConfig.AuthenticationMethod {
+				s := aaaAuthMethodUnionToStr(m)
+				if s != "" {
+					parts = append(parts, s)
+				}
+			}
+			if len(parts) > 0 {
+				aaa_map[AAA_AUTH_KEY].Field[AAA_LOGIN_FLD] = strings.Join(parts, ",")
+			}
+		}
+
+		if authConfig.Failthrough != nil {
+			aaa_map[AAA_AUTH_KEY].Field[AAA_FAILTHROUGH_FLD] = aaaBoolToStr(*authConfig.Failthrough)
+		}
+		if authConfig.Fallback != nil {
+			aaa_map[AAA_AUTH_KEY].Field[AAA_FALLBACK_FLD] = aaaBoolToStr(*authConfig.Fallback)
+		}
+		if authConfig.Debug != nil {
+			aaa_map[AAA_AUTH_KEY].Field[AAA_DEBUG_FLD] = aaaBoolToStr(*authConfig.Debug)
 		}
 	}
-	aaaMap, ok := aaaObj.(map[string]interface{})
-	if !ok {
-		return res_map, err
-	}
 
-	if auth, ok := aaaMap["authentication"]; ok {
-		authMap, ok := auth.(map[string]interface{})
-		if ok {
-			aaa_map[AAA_AUTH_KEY] = db.Value{Field: make(map[string]string)}
-			if config, ok := authMap["config"]; ok {
-				configMap, ok := config.(map[string]interface{})
-				if ok {
-					aaaProcessAuthConfig(configMap, aaa_map)
+	if aaaObj.Authorization != nil && aaaObj.Authorization.Config != nil {
+		authzConfig := aaaObj.Authorization.Config
+		aaa_map[AAA_AUTHZ_KEY] = db.Value{Field: make(map[string]string)}
+
+		if len(authzConfig.AuthorizationMethod) > 0 {
+			var parts []string
+			for _, m := range authzConfig.AuthorizationMethod {
+				s := aaaAuthzMethodUnionToStr(m)
+				if s != "" {
+					parts = append(parts, s)
 				}
+			}
+			if len(parts) > 0 {
+				aaa_map[AAA_AUTHZ_KEY].Field[AAA_LOGIN_FLD] = strings.Join(parts, ",")
 			}
 		}
 	}
 
-	if authz, ok := aaaMap["authorization"]; ok {
-		authzMap, ok := authz.(map[string]interface{})
-		if ok {
-			aaa_map[AAA_AUTHZ_KEY] = db.Value{Field: make(map[string]string)}
-			if config, ok := authzMap["config"]; ok {
-				configMap, ok := config.(map[string]interface{})
-				if ok {
-					aaaProcessAuthzConfig(configMap, aaa_map)
+	if aaaObj.Accounting != nil && aaaObj.Accounting.Config != nil {
+		acctConfig := aaaObj.Accounting.Config
+		aaa_map[AAA_ACCT_KEY] = db.Value{Field: make(map[string]string)}
+
+		if len(acctConfig.AccountingMethod) > 0 {
+			var parts []string
+			for _, m := range acctConfig.AccountingMethod {
+				s := aaaAcctMethodUnionToStr(m)
+				if s != "" {
+					parts = append(parts, s)
 				}
 			}
-		}
-	}
-
-	if acct, ok := aaaMap["accounting"]; ok {
-		acctMap, ok := acct.(map[string]interface{})
-		if ok {
-			aaa_map[AAA_ACCT_KEY] = db.Value{Field: make(map[string]string)}
-			if config, ok := acctMap["config"]; ok {
-				configMap, ok := config.(map[string]interface{})
-				if ok {
-					aaaProcessAcctConfig(configMap, aaa_map)
-				}
+			if len(parts) > 0 {
+				aaa_map[AAA_ACCT_KEY].Field[AAA_LOGIN_FLD] = strings.Join(parts, ",")
 			}
 		}
 	}
@@ -198,82 +240,6 @@ var YangToDb_aaa_subtree_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (m
 		res_map[AAA_TBL] = aaa_map
 	}
 	return res_map, err
-}
-
-func aaaExtractJsonPayload(inParams XfmrParams) map[string]interface{} {
-	if inParams.param == nil {
-		return nil
-	}
-	if jsonMap, ok := inParams.param.(map[string]interface{}); ok {
-		return jsonMap
-	}
-	return nil
-}
-
-func aaaProcessAuthConfig(configMap map[string]interface{}, aaa_map map[string]db.Value) {
-	if _, ok := aaa_map[AAA_AUTH_KEY]; !ok {
-		aaa_map[AAA_AUTH_KEY] = db.Value{Field: make(map[string]string)}
-	}
-
-	if methods, ok := configMap["authentication-method"]; ok {
-		if methodList, ok := methods.([]interface{}); ok {
-			aaa_map[AAA_AUTH_KEY].Field[AAA_LOGIN_FLD] = aaaMethodListToLoginStr(methodList)
-		}
-	}
-
-	ft, ok := configMap["failthrough"]
-	if !ok {
-		ft, ok = configMap["openconfig-aaa-ext:failthrough"]
-	}
-	if ok {
-		if ftBool, ok := ft.(bool); ok {
-			aaa_map[AAA_AUTH_KEY].Field[AAA_FAILTHROUGH_FLD] = aaaBoolToStr(ftBool)
-		}
-	}
-
-	fb, ok := configMap["fallback"]
-	if !ok {
-		fb, ok = configMap["openconfig-aaa-ext:fallback"]
-	}
-	if ok {
-		if fbBool, ok := fb.(bool); ok {
-			aaa_map[AAA_AUTH_KEY].Field[AAA_FALLBACK_FLD] = aaaBoolToStr(fbBool)
-		}
-	}
-
-	dbg, ok := configMap["debug"]
-	if !ok {
-		dbg, ok = configMap["openconfig-aaa-ext:debug"]
-	}
-	if ok {
-		if dbgBool, ok := dbg.(bool); ok {
-			aaa_map[AAA_AUTH_KEY].Field[AAA_DEBUG_FLD] = aaaBoolToStr(dbgBool)
-		}
-	}
-}
-
-func aaaProcessAuthzConfig(configMap map[string]interface{}, aaa_map map[string]db.Value) {
-	if _, ok := aaa_map[AAA_AUTHZ_KEY]; !ok {
-		aaa_map[AAA_AUTHZ_KEY] = db.Value{Field: make(map[string]string)}
-	}
-
-	if methods, ok := configMap["authorization-method"]; ok {
-		if methodList, ok := methods.([]interface{}); ok {
-			aaa_map[AAA_AUTHZ_KEY].Field[AAA_LOGIN_FLD] = aaaMethodListToLoginStr(methodList)
-		}
-	}
-}
-
-func aaaProcessAcctConfig(configMap map[string]interface{}, aaa_map map[string]db.Value) {
-	if _, ok := aaa_map[AAA_ACCT_KEY]; !ok {
-		aaa_map[AAA_ACCT_KEY] = db.Value{Field: make(map[string]string)}
-	}
-
-	if methods, ok := configMap["accounting-method"]; ok {
-		if methodList, ok := methods.([]interface{}); ok {
-			aaa_map[AAA_ACCT_KEY].Field[AAA_LOGIN_FLD] = aaaMethodListToLoginStr(methodList)
-		}
-	}
 }
 
 var DbToYang_aaa_subtree_xfmr SubTreeXfmrDbToYang = func(inParams XfmrParams) error {
