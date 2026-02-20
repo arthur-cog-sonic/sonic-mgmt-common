@@ -1,0 +1,74 @@
+module openconfig-aaa-sonic-ext {
+
+    yang-version "1";
+
+    namespace "http://openconfig.net/yang/aaa/sonic-ext";
+    prefix "oc-aaa-sonic-ext";
+
+    import openconfig-aaa { prefix oc-aaa; }
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "SONiC-specific augmentations to the OpenConfig AAA model.
+         Adds failthrough, fallback, and debug leaves to the
+         authentication config container.";
+
+    revision 2024-01-20 {
+        description
+            "Initial revision.";
+    }
+
+    augment /oc-aaa:aaa/oc-aaa:authentication/oc-aaa:config {
+        leaf failthrough {
+            type boolean;
+            default false;
+            description
+                "When set to true, authentication is attempted on
+                 the next configured server/local in the list upon
+                 failure.";
+        }
+
+        leaf fallback {
+            type boolean;
+            default false;
+            description
+                "Allow AAA fallback to local authentication when
+                 remote authentication servers are unreachable.";
+        }
+
+        leaf debug {
+            type boolean;
+            default false;
+            description
+                "Enable or disable AAA debugging.";
+        }
+    }
+
+    augment /oc-aaa:aaa/oc-aaa:authentication/oc-aaa:state {
+        leaf failthrough {
+            type boolean;
+            description
+                "When set to true, authentication is attempted on
+                 the next configured server/local in the list upon
+                 failure.";
+        }
+
+        leaf fallback {
+            type boolean;
+            description
+                "Allow AAA fallback to local authentication when
+                 remote authentication servers are unreachable.";
+        }
+
+        leaf debug {
+            type boolean;
+            description
+                "Enable or disable AAA debugging.";
+        }
+    }
+}
