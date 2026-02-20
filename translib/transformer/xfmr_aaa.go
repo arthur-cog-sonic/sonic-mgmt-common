@@ -221,19 +221,31 @@ func aaaProcessAuthConfig(configMap map[string]interface{}, aaa_map map[string]d
 		}
 	}
 
-	if ft, ok := configMap["failthrough"]; ok {
+	ft, ok := configMap["failthrough"]
+	if !ok {
+		ft, ok = configMap["openconfig-aaa-ext:failthrough"]
+	}
+	if ok {
 		if ftBool, ok := ft.(bool); ok {
 			aaa_map[AAA_AUTH_KEY].Field[AAA_FAILTHROUGH_FLD] = aaaBoolToStr(ftBool)
 		}
 	}
 
-	if fb, ok := configMap["fallback"]; ok {
+	fb, ok := configMap["fallback"]
+	if !ok {
+		fb, ok = configMap["openconfig-aaa-ext:fallback"]
+	}
+	if ok {
 		if fbBool, ok := fb.(bool); ok {
 			aaa_map[AAA_AUTH_KEY].Field[AAA_FALLBACK_FLD] = aaaBoolToStr(fbBool)
 		}
 	}
 
-	if dbg, ok := configMap["debug"]; ok {
+	dbg, ok := configMap["debug"]
+	if !ok {
+		dbg, ok = configMap["openconfig-aaa-ext:debug"]
+	}
+	if ok {
 		if dbgBool, ok := dbg.(bool); ok {
 			aaa_map[AAA_AUTH_KEY].Field[AAA_DEBUG_FLD] = aaaBoolToStr(dbgBool)
 		}
