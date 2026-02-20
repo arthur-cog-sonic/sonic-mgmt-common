@@ -1,0 +1,125 @@
+module openconfig-aaa-annot {
+
+    yang-version "1";
+
+    namespace "http://openconfig.net/yang/aaa-annot";
+    prefix "oc-aaa-annot";
+
+    import sonic-extensions { prefix sonic-ext; }
+    import openconfig-aaa { prefix oc-aaa; }
+    import openconfig-aaa-sonic-ext { prefix oc-aaa-sonic-ext; }
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "OpenConfig AAA YANG annotations for SONiC transformer mapping";
+
+    revision 2024-01-20 {
+        description
+            "Initial revision.";
+    }
+
+    deviation /oc-aaa:aaa/oc-aaa:authentication {
+      deviate add {
+        sonic-ext:table-name "AAA";
+        sonic-ext:key-transformer "aaa_tbl_key_xfmr";
+      }
+    }
+
+    deviation /oc-aaa:aaa/oc-aaa:authentication/oc-aaa:config/oc-aaa:authentication-method {
+      deviate add {
+        sonic-ext:field-name "login";
+        sonic-ext:field-transformer "aaa_auth_method_xfmr";
+      }
+    }
+
+    deviation /oc-aaa:aaa/oc-aaa:authentication/oc-aaa:state/oc-aaa:authentication-method {
+      deviate add {
+        sonic-ext:field-name "login";
+        sonic-ext:field-transformer "aaa_auth_method_xfmr";
+      }
+    }
+
+    deviation /oc-aaa:aaa/oc-aaa:authentication/oc-aaa:config/oc-aaa-sonic-ext:failthrough {
+      deviate add {
+        sonic-ext:field-name "failthrough";
+      }
+    }
+
+    deviation /oc-aaa:aaa/oc-aaa:authentication/oc-aaa:config/oc-aaa-sonic-ext:fallback {
+      deviate add {
+        sonic-ext:field-name "fallback";
+      }
+    }
+
+    deviation /oc-aaa:aaa/oc-aaa:authentication/oc-aaa:config/oc-aaa-sonic-ext:debug {
+      deviate add {
+        sonic-ext:field-name "debug";
+      }
+    }
+
+    deviation /oc-aaa:aaa/oc-aaa:authentication/oc-aaa:state/oc-aaa-sonic-ext:failthrough {
+      deviate add {
+        sonic-ext:field-name "failthrough";
+      }
+    }
+
+    deviation /oc-aaa:aaa/oc-aaa:authentication/oc-aaa:state/oc-aaa-sonic-ext:fallback {
+      deviate add {
+        sonic-ext:field-name "fallback";
+      }
+    }
+
+    deviation /oc-aaa:aaa/oc-aaa:authentication/oc-aaa:state/oc-aaa-sonic-ext:debug {
+      deviate add {
+        sonic-ext:field-name "debug";
+      }
+    }
+
+    deviation /oc-aaa:aaa/oc-aaa:authorization {
+      deviate add {
+        sonic-ext:table-name "AAA";
+        sonic-ext:key-transformer "aaa_tbl_key_xfmr";
+      }
+    }
+
+    deviation /oc-aaa:aaa/oc-aaa:authorization/oc-aaa:config/oc-aaa:authorization-method {
+      deviate add {
+        sonic-ext:field-name "login";
+        sonic-ext:field-transformer "aaa_authz_method_xfmr";
+      }
+    }
+
+    deviation /oc-aaa:aaa/oc-aaa:authorization/oc-aaa:state/oc-aaa:authorization-method {
+      deviate add {
+        sonic-ext:field-name "login";
+        sonic-ext:field-transformer "aaa_authz_method_xfmr";
+      }
+    }
+
+    deviation /oc-aaa:aaa/oc-aaa:accounting {
+      deviate add {
+        sonic-ext:table-name "AAA";
+        sonic-ext:key-transformer "aaa_tbl_key_xfmr";
+      }
+    }
+
+    deviation /oc-aaa:aaa/oc-aaa:accounting/oc-aaa:config/oc-aaa:accounting-method {
+      deviate add {
+        sonic-ext:field-name "login";
+        sonic-ext:field-transformer "aaa_acct_method_xfmr";
+      }
+    }
+
+    deviation /oc-aaa:aaa/oc-aaa:accounting/oc-aaa:state/oc-aaa:accounting-method {
+      deviate add {
+        sonic-ext:field-name "login";
+        sonic-ext:field-transformer "aaa_acct_method_xfmr";
+      }
+    }
+
+}
