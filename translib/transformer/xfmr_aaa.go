@@ -134,7 +134,7 @@ var YangToDb_aaa_subtree_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (m
 	res_map := make(map[string]map[string]db.Value)
 	aaa_map := make(map[string]db.Value)
 
-	log.Info("YangToDb_aaa_subtree_xfmr: uri=", inParams.uri)
+	log.Infof("YangToDb_aaa_subtree_xfmr: uri=%s, requestUri=%s, oper=%d", inParams.uri, inParams.requestUri, inParams.oper)
 	targetUriPath, _, _ := XfmrRemoveXPATHPredicates(inParams.requestUri)
 
 	if inParams.oper == DELETE {
@@ -165,16 +165,23 @@ var YangToDb_aaa_subtree_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (m
 	}
 
 	sysObj := getAaaSystemRoot(inParams.ygRoot)
-	if sysObj == nil || sysObj.Aaa == nil {
-		log.Info("YangToDb_aaa_subtree_xfmr: no AAA data in ygRoot")
+	if sysObj == nil {
+		log.Info("YangToDb_aaa_subtree_xfmr: sysObj is nil")
+		return res_map, err
+	}
+	if sysObj.Aaa == nil {
+		log.Info("YangToDb_aaa_subtree_xfmr: sysObj.Aaa is nil")
 		return res_map, err
 	}
 
 	aaaObj := sysObj.Aaa
+	log.Infof("YangToDb_aaa_subtree_xfmr: aaaObj.Authentication=%v", aaaObj.Authentication != nil)
 
 	if aaaObj.Authentication != nil && aaaObj.Authentication.Config != nil {
 		authConfig := aaaObj.Authentication.Config
 		aaa_map[AAA_AUTH_KEY] = db.Value{Field: make(map[string]string)}
+		log.Infof("YangToDb_aaa_subtree_xfmr: authConfig methods=%d, failthrough=%v, fallback=%v, debug=%v",
+			len(authConfig.AuthenticationMethod), authConfig.Failthrough, authConfig.Fallback, authConfig.Debug)
 
 		if len(authConfig.AuthenticationMethod) > 0 {
 			var parts []string
@@ -238,6 +245,12 @@ var YangToDb_aaa_subtree_xfmr SubTreeXfmrYangToDb = func(inParams XfmrParams) (m
 
 	if len(aaa_map) > 0 {
 		res_map[AAA_TBL] = aaa_map
+	}
+	log.Infof("YangToDb_aaa_subtree_xfmr: returning res_map with %d tables", len(res_map))
+	for tbl, entries := range res_map {
+		for key, val := range entries {
+			log.Infof("YangToDb_aaa_subtree_xfmr: res_map[%s][%s] = %v", tbl, key, val.Field)
+		}
 	}
 	return res_map, err
 }
