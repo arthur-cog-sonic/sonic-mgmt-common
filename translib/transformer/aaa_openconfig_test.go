@@ -69,14 +69,14 @@ func Test_aaa_authentication_login(t *testing.T) {
 
 	t.Log("\n\n+++++++++++++ Performing Set on AAA authentication login ++++++++++++")
 	url = "/openconfig-system:system/aaa"
-	url_body_json = `{"openconfig-system:aaa":{"authentication":{"config":{"authentication-method":["tacacs+","local"]}}}}`
-	expected_map = map[string]interface{}{"AAA": map[string]interface{}{"authentication": map[string]interface{}{"login": "tacacs+,local"}}}
+	url_body_json = `{"openconfig-system:aaa":{"authentication":{"config":{"authentication-method":["local","radius"]}}}}`
+	expected_map = map[string]interface{}{"AAA": map[string]interface{}{"authentication": map[string]interface{}{"login": "local,radius"}}}
 	cleanuptbl = map[string]interface{}{"AAA": map[string]interface{}{"authentication": ""}}
 	loadDB(db.ConfigDB, pre_req_map)
 	time.Sleep(1 * time.Second)
-	t.Run("Test set AAA login tacacs+ local", processSetRequest(url, url_body_json, "PATCH", false, nil))
+	t.Run("Test set AAA login local radius", processSetRequest(url, url_body_json, "PATCH", false, nil))
 	time.Sleep(1 * time.Second)
-	t.Run("Verify AAA login tacacs+ local", verifyDbResult(rclient, "AAA|authentication", expected_map, false))
+	t.Run("Verify AAA login local radius", verifyDbResult(rclient, "AAA|authentication", expected_map, false))
 	time.Sleep(1 * time.Second)
 	unloadDB(db.ConfigDB, cleanuptbl)
 	time.Sleep(1 * time.Second)
