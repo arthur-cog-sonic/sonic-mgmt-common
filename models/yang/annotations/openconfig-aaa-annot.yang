@@ -1,0 +1,30 @@
+module openconfig-aaa-annot {
+    yang-version "1";
+
+    namespace "http://openconfig.net/yang/annotation/oc-aaa-annot";
+    prefix "oc-aaa-annot";
+
+    import sonic-extensions { prefix sonic-ext; }
+    import openconfig-aaa { prefix oc-aaa; }
+    import openconfig-system { prefix oc-sys; }
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "OpenConfig AAA YANG annotations for SONiC transformer mapping.";
+
+    revision 2024-01-20 {
+        description
+            "Initial revision.";
+    }
+
+    deviation /oc-sys:system/oc-aaa:aaa {
+        deviate add {
+            sonic-ext:subtree-transformer "aaa_subtree_xfmr";
+        }
+    }
+}
